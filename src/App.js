@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import MidArea from "./components/MidArea";
 import PreviewArea from "./components/PreviewArea";
 import { ScratchProvider } from "./context/ScratchContext";
+import SpriteCoordinatesPanel from "./components/SpriteCoordinatesPanel";
 
 export default function App() {
   const [midAreaWidth, setMidAreaWidth] = useState(60); // Initial width in percentage (67%)
@@ -78,6 +79,7 @@ export default function App() {
               <PreviewArea />
             </div>
             <div style={{ height: '25%' }} className="border-t border-blue-200">
+            <SpriteCoordinatesPanel/>
             </div>
           </div>
         </div>

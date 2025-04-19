@@ -129,6 +129,20 @@ export const ScratchProvider = ({ children }) => {
         setSpriteModalOpen(false);
     };
 
+    const updateSpritePosition = (id, x, y) => {
+        // First update the sprite position
+        setSprites(prevSprites => {
+            const newSprites = prevSprites.map(sprite => {
+                if (sprite.id === id) {
+                    return { ...sprite, x, y };
+                }
+                return sprite;
+            });
+
+            return newSprites;
+        });
+    };
+
    
     return (
         <ScratchContext.Provider
@@ -141,6 +155,7 @@ export const ScratchProvider = ({ children }) => {
                 clearSpriteScripts,
                 deleteSprite,
                 addSprite,
+                updateSpritePosition,
                 isPlaying,
                 togglePlay,
                 spriteModalOpen, 
