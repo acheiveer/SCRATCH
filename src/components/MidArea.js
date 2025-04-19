@@ -1,5 +1,7 @@
 import { useContext } from "react";
 import React from "react";
+import Block from "./Block";
+import Icon from "./Icon";
 import { ScratchContext } from "../context/ScratchContext";
 
 export default function MidArea() {
