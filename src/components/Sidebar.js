@@ -1,16 +1,17 @@
 import React, { useContext } from "react";
 import Icon from "./Icon";
 import { ScratchContext } from "../context/ScratchContext";
-
+import SpriteSelectionModal from "./SpriteSelectionModal";
 
 export default function Sidebar() {
 const {
-  setSprites,
   addBlockToSprite,
-  setSelectedSpriteId,
   addSprite,
   isPlaying,
   togglePlay,
+  spriteModalOpen, 
+  openSpriteSelector,
+  closeSpriteSelector
 } = useContext(ScratchContext);
 
 
@@ -59,6 +60,11 @@ const handleAddControlBlock = (blockType) => {
   }
 };
 
+// Handle sprite selection
+const handleSelectSprite = (spriteType) => {
+  addSprite(spriteType);
+};
+
 // Handle drag start event
 const handleDragStart = (e, blockType, blockSubtype, blockData) => {
   const dragData = {
@@ -83,8 +89,8 @@ const handleDragStart = (e, blockType, blockSubtype, blockData) => {
       </button>
       <button 
           className="w-full min-w-[150px] bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 my-2 rounded-md font-bold"
-           onClick={addSprite}
-          // onClick={openSpriteSelector}
+          // onClick={addSprite}
+          onClick={openSpriteSelector}
       >
           Add Sprite
       </button>
@@ -154,7 +160,12 @@ const handleDragStart = (e, blockType, blockSubtype, blockData) => {
       >
         {"Repeat __ times"}
       </div>
-      
+      {/* Sprite Selection Modal */}
+      <SpriteSelectionModal 
+        isOpen={spriteModalOpen} 
+        onClose={closeSpriteSelector} 
+        onSelectSprite={handleSelectSprite} 
+      />
     </div>
   );
 }

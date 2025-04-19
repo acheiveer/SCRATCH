@@ -22,6 +22,10 @@ export const ScratchProvider = ({ children }) => {
 
     const [selectedSpriteId, setSelectedSpriteId] = useState(sprites[0].id);
     const [isPlaying, setIsPlaying] = useState(false);
+
+    // State to control sprite selection modal visibility
+    const [spriteModalOpen, setSpriteModalOpen] = useState(false);
+
     
     const swappedPairs = useRef(new Set());
 
@@ -115,6 +119,16 @@ export const ScratchProvider = ({ children }) => {
         setIsPlaying(!isPlaying);
     };
 
+    // Open sprite selection modal
+    const openSpriteSelector = () => {
+        setSpriteModalOpen(true);
+    };
+
+    // Close sprite selection modal
+    const closeSpriteSelector = () => {
+        setSpriteModalOpen(false);
+    };
+
    
     return (
         <ScratchContext.Provider
@@ -129,6 +143,9 @@ export const ScratchProvider = ({ children }) => {
                 addSprite,
                 isPlaying,
                 togglePlay,
+                spriteModalOpen, 
+                openSpriteSelector,
+                closeSpriteSelector
             }}
         >
             {children}
