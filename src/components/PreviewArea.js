@@ -30,6 +30,138 @@ export default function PreviewArea() {
     spriteId: null
   });
 
+  // Effect to start animations when isPlaying changes to true
+  useEffect(() => {
+    if (isPlaying) {
+      // Start animations for all sprites with scripts
+      const spritesToAnimate = sprites.filter(sprite => 
+        sprite.isExecuting && sprite.scripts.length > 0
+      );
+      
+      // Create a set of sprite IDs that are being animated
+      const newAnimatingSprites = new Set(
+        spritesToAnimate.map(sprite => sprite.id)
+      );
+      setAnimatingSprites(newAnimatingSprites);
+      
+      // Start animation for each sprite
+      spritesToAnimate.forEach(sprite => {
+        animateSprite(sprite);
+      });
+    } else {
+      // When stopping, clear the animating sprites set
+      setAnimatingSprites(new Set());
+    }
+  }, [isPlaying]); // Only depends on isPlaying state
+
+  // Define the animateSprite function inside useEffect to access latest state
+  const animateSprite = async (sprite) => {
+    try {
+      for (let i = 0; i < sprite.scripts.length; i++) {
+        const script = sprite.scripts[i];
+        await executeScript(sprite, script);
+      }
+    } catch (error) {
+      console.error(`Error animating sprite ${sprite.id}:`, error);
+    } finally {
+      // Remove this sprite from animating set when done
+      setAnimatingSprites(prev => {
+        const updated = new Set(prev);
+        updated.delete(sprite.id);
+        return updated;
+      });
+    }
+  };
+
+  
+
+  const executeScript = async (sprite, script) => {
+    const { type, subtype } = script;
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  
+    if (type === "motion") {
+      switch (subtype) {
+        case "move_steps":
+          {
+            // For movement, use smaller incremental steps to detect collisions better
+            const angle = sprite.rotation * (Math.PI / 180);
+            const totalSteps = script.steps;
+            const stepSize = 5; // Move in smaller increments
+            const stepCount = Math.abs(Math.ceil(totalSteps / stepSize));
+            const actualStepSize = totalSteps / stepCount;
+            
+            // Move in small steps to allow for collision detection
+            for (let i = 0; i < stepCount; i++) {
+              const stepX = sprite.x + actualStepSize * Math.cos(angle);
+              const stepY = sprite.y + actualStepSize * Math.sin(angle);
+              updateSpritePosition(sprite.id, stepX, stepY);
+              await delay(50); // Small delay between incremental moves
+            }
+          }
+          break;
+  
+        case "turn_degrees":
+          {
+            const delta = script.direction === "left" ? -script.degrees : script.degrees;
+            updateSpriteRotation(sprite.id, sprite.rotation + delta);
+            await delay(300);
+          }
+          break;
+  
+        case "goto_xy":
+          // For goto, also use incremental movement for better collision detection
+          {
+            const startX = sprite.x;
+            const startY = sprite.y;
+            const targetX = script.x;
+            const targetY = script.y;
+            const dx = targetX - startX;
+            const dy = targetY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Only use incremental movement for longer distances
+            if (distance > 50) {
+              const steps = Math.ceil(distance / 10);
+              const stepX = dx / steps;
+              const stepY = dy / steps;
+              
+              for (let i = 0; i < steps; i++) {
+                const newX = startX + stepX * (i + 1);
+                const newY = startY + stepY * (i + 1);
+                updateSpritePosition(sprite.id, newX, newY);
+                await delay(50);
+              }
+            } else {
+              // For short distances, just go directly
+              updateSpritePosition(sprite.id, targetX, targetY);
+              await delay(300);
+            }
+          }
+          break;
+  
+        default:
+          break;
+      }
+    } else if (type === "looks") {
+      if (subtype === "say_for_seconds" || subtype === "think_for_seconds") {
+        setSpriteMessage(
+          sprite.id, 
+          subtype.includes("say") ? "say" : "think", 
+          script.message, 
+          script.duration
+        );
+        await delay(script.duration * 1000);
+      }
+    } else if (type === "control" && subtype === "repeat") {
+      for (let i = 0; i < script.times; i++) {
+        for (let innerScript of sprite.scripts) {
+          if (innerScript !== script) {
+            await executeScript(sprite, innerScript);
+          }
+        }
+      }
+    }
+  };
 
   const renderSpriteComponent = (spriteType) => {
     switch (spriteType) {
@@ -113,6 +245,10 @@ export default function PreviewArea() {
         </div>
         {renderSpriteComponent(sprite.type)}
         {/* <CatSprite /> */}
+
+        <div style={coordsStyle}> 
+          x: {Math.round(sprite.x)}, y: {Math.round(sprite.y)}
+        </div>
       </div>
     );
   };

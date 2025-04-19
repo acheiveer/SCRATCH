@@ -143,6 +143,49 @@ export const ScratchProvider = ({ children }) => {
         });
     };
 
+    const updateSpriteRotation = (id, rotation) => {
+        setSprites(prevSprites => prevSprites.map(sprite => {
+            if (sprite.id === id) {
+                return { ...sprite, rotation };
+            }
+            return sprite;
+        }));
+    };
+
+    const setSpriteMessage = (id, type, text, duration) => {
+        setSprites(prevSprites => prevSprites.map(sprite => {
+            if (sprite.id === id) {
+                // Clear any existing message timer
+                if (sprite.messageTimer) {
+                    clearTimeout(sprite.messageTimer);
+                }
+
+                // Set the new message
+                let updates = {};
+                if (type === "say") {
+                    updates = { sayText: text, thinkText: "" };
+                } else {
+                    updates = { sayText: "", thinkText: text };
+                }
+
+                // Set a timer to clear the message after duration (if specified)
+                let messageTimer = null;
+                if (duration) {
+                    messageTimer = setTimeout(() => {
+                        setSprites(currentSprites =>
+                            currentSprites.map(s =>
+                                s.id === id ? { ...s, sayText: "", thinkText: "", messageTimer: null } : s
+                            )
+                        );
+                    }, duration * 1000);
+                }
+
+                return { ...sprite, ...updates, messageTimer };
+            }
+            return sprite;
+        }));
+    };
+
    
     return (
         <ScratchContext.Provider
@@ -156,6 +199,8 @@ export const ScratchProvider = ({ children }) => {
                 deleteSprite,
                 addSprite,
                 updateSpritePosition,
+                setSpriteMessage,
+                updateSpriteRotation,
                 isPlaying,
                 togglePlay,
                 spriteModalOpen, 
