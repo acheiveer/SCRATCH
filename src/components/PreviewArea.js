@@ -73,8 +73,6 @@ export default function PreviewArea() {
     }
   };
 
-  
-
   const executeScript = async (sprite, script) => {
     const { type, subtype } = script;
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -163,6 +161,46 @@ export default function PreviewArea() {
     }
   };
 
+  // Drag functionality
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!dragState.current.isDragging) return;
+
+      const { startX, startY, spriteId } = dragState.current;
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      const sprite = sprites.find((s) => s.id === spriteId);
+      if (sprite) {
+        updateSpritePosition(sprite.id, sprite.x + deltaX, sprite.y + deltaY);
+        dragState.current.startX = e.clientX;
+        dragState.current.startY = e.clientY;
+      }
+    };
+
+    const handleMouseUp = () => {
+      dragState.current.isDragging = false;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [sprites, updateSpritePosition]);
+
+  const handleMouseDown = (e, sprite) => {
+    if (isPlaying) return;
+    dragState.current = {
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      spriteId: sprite.id
+    };
+  };
+
   const renderSpriteComponent = (spriteType) => {
     switch (spriteType) {
       case "cat":
@@ -199,7 +237,8 @@ export default function PreviewArea() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-     
+       // Add glow effect on collision
+      boxShadow: collisionOccurred && animatingSprites.has(sprite.id) ? "0 0 10px 5px rgba(255, 215, 0, 0.7)" : "none"
     };
 
     const speechBubbleStyle = {
@@ -235,7 +274,7 @@ export default function PreviewArea() {
         style={spriteStyle}
         onMouseDown={(e) => handleMouseDown(e, sprite)}
         onClick={() => !isPlaying && setSelectedSpriteId(sprite.id)}
-  
+        className={collisionOccurred ? "animate-pulse" : ""}        // collison
       >
         {isAnimating && (
           <div className="absolute -top-5 -right-5 w-4 h-4 bg-green-500 rounded-full animate-pulse" />
@@ -267,6 +306,15 @@ export default function PreviewArea() {
       </div>
       <div className="w-full h-full relative    rounded-lg">
         {sprites.map(sprite => renderSprite(sprite))}
+
+        {/* Visual overlay for collision feedback */}
+        {collisionOccurred && (
+          <div className="absolute inset-0 bg-yellow-100 bg-opacity-20 pointer-events-none animate-pulse">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-yellow-600 bg-white bg-opacity-70 px-4 py-2 rounded-lg">
+              Collison! Actions Swapped
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

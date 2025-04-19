@@ -26,8 +26,21 @@ export const ScratchProvider = ({ children }) => {
     // State to control sprite selection modal visibility
     const [spriteModalOpen, setSpriteModalOpen] = useState(false);
 
+    // State to control collison
+    const [collisionOccurred, setCollisionOccurred] = useState(false); 
+
     
     const swappedPairs = useRef(new Set());
+    // Effect to check for collisions while playing
+    useEffect(() => {
+        if (isPlaying) {
+            return () => {
+                // Clear swapped pairs when play state changes
+                swappedPairs.current.clear();
+                setCollisionOccurred(false);
+            }
+        }
+    }, [isPlaying]);
 
     const addBlockToSprite = (blockType, blockData) => {
         if (!selectedSpriteId) return;
@@ -100,6 +113,8 @@ export const ScratchProvider = ({ children }) => {
         };
         setSprites([...sprites, newSprite]);
         setSelectedSpriteId(newSprite.id);
+        swappedPairs.current.clear(); // Clear swapped pairs on reset
+        setCollisionOccurred(false); // Reset collision state
     };
 
     const togglePlay = () => {
@@ -110,6 +125,8 @@ export const ScratchProvider = ({ children }) => {
                 sayText: "",
                 thinkText: ""
             })));
+            swappedPairs.current.clear(); // Clear swapped pairs when stopping
+            setCollisionOccurred(false); // Reset collision state
         } else {
             setSprites(sprites.map(sprite => ({
                 ...sprite,
@@ -139,8 +156,113 @@ export const ScratchProvider = ({ children }) => {
                 return sprite;
             });
 
+            // Then check for collisions with the updated positions
+            if (isPlaying) {
+                setTimeout(() => {
+                    checkCollisionsForSprite(id, x, y, newSprites);
+                }, 0);
+            }
+
             return newSprites;
         });
+    };
+
+    //Add a new function to check collisions just for a specific sprite
+    const checkCollisionsForSprite = (movedSpriteId, x, y, currentSprites) => {
+        // Skip if not playing
+        if (!isPlaying) return false;
+
+        // Get the sprite that just moved
+        const movedSprite = currentSprites.find(s => s.id === movedSpriteId);
+        if (!movedSprite || movedSprite.scripts.length === 0) return false;
+
+        // Check for collisions with other sprites
+        let collisionDetected = false;
+
+        currentSprites.forEach(otherSprite => {
+            // Skip self-collision or sprites without scripts
+            if (otherSprite.id === movedSpriteId || otherSprite.scripts.length === 0) {
+                return;
+            }
+
+            // Generate unique pair key for these sprites
+            const pairKey = movedSpriteId < otherSprite.id ?
+                `${movedSpriteId}-${otherSprite.id}` :
+                `${otherSprite.id}-${movedSpriteId}`;
+
+            // Skip if these sprites have already collided
+            if (swappedPairs.current.has(pairKey)) {
+                return;
+            }
+
+            // Calculate distance between sprites - actual coordinate-based collision detection
+            const dx = x - otherSprite.x;
+            const dy = y - otherSprite.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Collision threshold - adjust this value based on your sprite sizes
+            const collisionThreshold = 50;
+
+            // If sprites are close enough, it's a collision
+            if (distance < collisionThreshold) {
+                // Visual feedback - make the sprites say something
+                setSpriteMessage(movedSpriteId, "say", "Collision!", 1);
+                setSpriteMessage(otherSprite.id, "say", "Ouch!", 1);
+
+                // Swap scripts between the two sprites
+                const movedSpriteScripts = [...movedSprite.scripts];
+
+                // Update state with the swapped scripts
+                setSprites(prevSprites =>
+                    prevSprites.map(s => {
+                        if (s.id === movedSpriteId) {
+                            return {
+                                ...s,
+                                scripts: [...otherSprite.scripts],
+                                isExecuting: false // Reset execution state to trigger animation restart
+                            };
+                        } else if (s.id === otherSprite.id) {
+                            return {
+                                ...s,
+                                scripts: movedSpriteScripts,
+                                isExecuting: false // Reset execution state to trigger animation restart
+                            };
+                        }
+                        return s;
+                    })
+                );
+
+                // Mark this pair as having swapped
+                swappedPairs.current.add(pairKey);
+
+                // Show collision notification
+                setCollisionOccurred(true);
+
+                // Reset sprites to executing after a short delay (to re-trigger animations)
+                setTimeout(() => {
+                    setSprites(prevSprites =>
+                        prevSprites.map(s => {
+                            if (s.id === movedSpriteId || s.id === otherSprite.id) {
+                                return {
+                                    ...s,
+                                    isExecuting: true // Restart execution with new scripts
+                                };
+                            }
+                            return s;
+                        })
+                    );
+
+                    // Hide collision notification after delay
+                    setTimeout(() => {
+                        setCollisionOccurred(false);
+                    }, 800); // Show feedback a bit longer
+                }, 100);
+
+                collisionDetected = true;
+            }
+        });
+
+        return collisionDetected;
     };
 
     const updateSpriteRotation = (id, rotation) => {
@@ -205,7 +327,8 @@ export const ScratchProvider = ({ children }) => {
                 togglePlay,
                 spriteModalOpen, 
                 openSpriteSelector,
-                closeSpriteSelector
+                closeSpriteSelector,
+                collisionOccurred
             }}
         >
             {children}
