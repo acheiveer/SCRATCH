@@ -25,6 +25,53 @@ export const ScratchProvider = ({ children }) => {
     
     const swappedPairs = useRef(new Set());
 
+    const addBlockToSprite = (blockType, blockData) => {
+        if (!selectedSpriteId) return;
+
+        setSprites(sprites.map(sprite => {
+            if (sprite.id === selectedSpriteId) {
+                return {
+                    ...sprite,
+                    scripts: [...sprite.scripts, {
+                        id: uuidv4(),
+                        type: blockType,
+                        ...blockData
+                    }]
+                };
+            }
+            return sprite;
+        }));
+    };
+
+    const deleteSprite = (spriteId) => {
+        // Don't delete if it's the last sprite
+        if (sprites.length <= 1) {
+            return;
+        }
+
+        // Filter out the sprite to be deleted
+        const updatedSprites = sprites.filter(sprite => sprite.id !== spriteId);
+        setSprites(updatedSprites);
+
+        // If the deleted sprite was selected, select another sprite
+        if (selectedSpriteId === spriteId) {
+            setSelectedSpriteId(updatedSprites[0]?.id);
+        }
+    };
+
+    const clearSpriteScripts = (spriteId) => {
+        setSprites(sprites.map(sprite => {
+          if (sprite.id === spriteId) {
+            return {
+              ...sprite,
+              scripts: [] // Clear all scripts
+            };
+          }
+          return sprite;
+        }));
+    };
+
+
     function capitalizeFirstLetterForSprite(str) {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -71,9 +118,14 @@ export const ScratchProvider = ({ children }) => {
    
     return (
         <ScratchContext.Provider
-            value={{   
+            value={{  
+                sprites, 
                 setSprites,
+                selectedSpriteId,
                 setSelectedSpriteId,
+                addBlockToSprite,
+                clearSpriteScripts,
+                deleteSprite,
                 addSprite,
                 isPlaying,
                 togglePlay,

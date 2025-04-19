@@ -6,6 +6,7 @@ import { ScratchContext } from "../context/ScratchContext";
 export default function Sidebar() {
 const {
   setSprites,
+  addBlockToSprite,
   setSelectedSpriteId,
   addSprite,
   isPlaying,
