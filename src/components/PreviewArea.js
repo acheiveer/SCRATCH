@@ -297,8 +297,8 @@ export default function PreviewArea() {
     <div className="w-full h-full overflow-hidden p-2 relative">  
       <div className="absolute top-2 right-2 z-10">
         <button
-          className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 my-2 rounded-md font-bold"
-          
+          className="bg-red-600 hover:bg-yellow-600 text-white px-2 py-1 my-2 rounded-md font-bold"
+          onClick={resetSprites}
         >
           Reset
           <Icon name="redo" size={15} className="text-white mx-2" />

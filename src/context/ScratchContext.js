@@ -117,6 +117,29 @@ export const ScratchProvider = ({ children }) => {
         setCollisionOccurred(false); // Reset collision state
     };
 
+    const resetSprites = () => {
+        const newSprites = sprites.map((sprite) => {
+            const randomX = Math.floor(Math.random() * 300 - 150);
+            const randomY = Math.floor(Math.random() * 300 - 150);
+            return {
+                ...sprite,
+                x: randomX,
+                y: randomY,
+                rotation: 0,
+                sayText: "",
+                thinkText: "",
+                isExecuting: false,
+                scripts: [] // Clear all scripts for each sprite
+            };
+        });
+        setSprites(newSprites);
+        setIsPlaying(false); // stop animation if running
+        setCollisionOccurred(false); // reset collision state
+        
+        // Also clear the swapped pairs tracking
+        swappedPairs.current.clear();
+    };
+
     const togglePlay = () => {
         if (isPlaying) {
             setSprites(sprites.map(sprite => ({
@@ -323,6 +346,7 @@ export const ScratchProvider = ({ children }) => {
                 updateSpritePosition,
                 setSpriteMessage,
                 updateSpriteRotation,
+                resetSprites,
                 isPlaying,
                 togglePlay,
                 spriteModalOpen, 
