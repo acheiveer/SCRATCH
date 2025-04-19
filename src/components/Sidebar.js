@@ -59,6 +59,19 @@ const handleAddControlBlock = (blockType) => {
   }
 };
 
+// Handle drag start event
+const handleDragStart = (e, blockType, blockSubtype, blockData) => {
+  const dragData = {
+    type: blockType,
+    subtype: blockSubtype,
+    ...blockData
+  };
+  
+  // Set drag data as JSON string
+  e.dataTransfer.setData("application/json", JSON.stringify(dragData));
+  e.dataTransfer.effectAllowed = "copy"; // Show copy cursor
+};
+
   return (
     <div className="w-50 flex-none h-full overflow-y-auto flex flex-col items-start p-2 border-r border-gray-200">
       <div className="font-bold"> {"Events"} </div>
@@ -79,12 +92,16 @@ const handleAddControlBlock = (blockType) => {
       <div className="font-bold mt-4"> {"Motion"} </div>
       <div 
         className="w-full min-w-[150px] flex flex-row flex-wrap bg-blue-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "motion", "move_steps", { steps: 10 })}
         onClick={() => handleAddMotionBlock("move_steps")}
       >
         {"Move __ steps"}
       </div>
       <div 
         className="w-full min-w-[150px] flex flex-row flex-wrap bg-blue-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "motion", "turn_degrees", { direction: "left", degrees: 15 })}
         onClick={() => handleAddMotionBlock("turn_left")}
       >
         {"Turn "}
@@ -93,6 +110,8 @@ const handleAddControlBlock = (blockType) => {
       </div>
       <div 
         className="w-full min-w-[150px] flex flex-row flex-wrap bg-blue-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "motion", "turn_degrees", { direction: "right", degrees: 15 })}
         onClick={() => handleAddMotionBlock("turn_right")}
       >
         {"Turn "}
@@ -101,6 +120,8 @@ const handleAddControlBlock = (blockType) => {
       </div>
       <div 
         className="w-full min-w-[150px]flex flex-row flex-wrap bg-blue-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "motion", "goto_xy", { x: 0, y: 0 })}
         onClick={() => handleAddMotionBlock("goto_xy")}
       >
         {"Go to x: __ y: __"}
@@ -109,12 +130,16 @@ const handleAddControlBlock = (blockType) => {
       <div className="font-bold mt-4"> {"Looks"} </div>
       <div 
         className="w-full min-w-[150px]flex flex-row flex-wrap bg-purple-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "looks", "say_for_seconds", { message: "Hello!", duration: 2 })}
         onClick={() => handleAddLooksBlock("say_for_seconds")}
       >
         {"Say Hello! for 2 seconds"}
       </div>
       <div 
         className="w-full min-w-[150px] flex flex-row flex-wrap bg-purple-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "looks", "think_for_seconds", { message: "Hmm...", duration: 2 })}
         onClick={() => handleAddLooksBlock("think_for_seconds")}
       >
         {"Think Hmm... for 2 seconds"}
@@ -123,6 +148,8 @@ const handleAddControlBlock = (blockType) => {
       <div className="font-bold mt-4"> {"Control"} </div>
       <div 
         className="w-full min-w-[150px] flex flex-row flex-wrap bg-yellow-500 text-white px-2 py-1 my-2 text-sm rounded-md font-bold cursor-pointer"
+        draggable
+        onDragStart={(e) => handleDragStart(e, "control", "repeat", { times: 10 })}
         onClick={() => handleAddControlBlock("repeat")}
       >
         {"Repeat __ times"}

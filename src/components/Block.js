@@ -1,7 +1,9 @@
 import React from 'react';
+import { useState } from 'react';
 import Icon from './Icon';
 
 export default function Block({ block, onUpdate, onDelete, isDragging }) {
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
 
     const getBlockStyle = () => {
         switch (block.type) {
@@ -19,6 +21,28 @@ export default function Block({ block, onUpdate, onDelete, isDragging }) {
     const handleInputChange = (field, value) => {
         onUpdate({ ...block, [field]: value });
       };
+
+    // Handle drag start for reordering
+    const handleDragStart = (e) => {
+        e.dataTransfer.setData("application/json", JSON.stringify({
+            block: block,
+            action: "reorder"
+        }));
+        e.dataTransfer.effectAllowed = "move";
+    };
+
+    // Handle drag over for reordering indication
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDraggedOver(true);
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    // Handle drag leave
+    const handleDragLeave = () => {
+        setIsDraggedOver(false);
+    };
+
 
     // Render block content based on type and subtype
   const renderBlockContent = () => {
@@ -148,8 +172,13 @@ export default function Block({ block, onUpdate, onDelete, isDragging }) {
   };
 
   return (
-   <div className={`${getBlockStyle()}  text-white px-2 py-1 my-2 text-sm rounded 
-                cursor-move` }>
+      <div className={`${getBlockStyle()}  text-white px-2 py-1 my-2 text-sm rounded 
+                cursor-move ${isDragging ? "opacity-50" : ""}
+                ${isDraggedOver ? "border-2 border-white" : ""}`}
+          draggable={true}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}>
    <div className="flex justify-between items-center">
         <div className="flex-1">{renderBlockContent()}</div>
         <button
