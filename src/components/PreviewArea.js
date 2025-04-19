@@ -1,5 +1,5 @@
 import React from "react";
-import CatSprite from "./CatSprite";
+import CatSprite from "../sprites/CatSprite";
 
 export default function PreviewArea() {
   return (

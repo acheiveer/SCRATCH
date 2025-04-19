@@ -2,9 +2,11 @@ import React from "react";
 import Sidebar from "./components/Sidebar";
 import MidArea from "./components/MidArea";
 import PreviewArea from "./components/PreviewArea";
+import { ScratchProvider } from "./context/ScratchContext";
 
 export default function App() {
   return (
+    <ScratchProvider>
     <div className="bg-blue-100 pt-6 font-sans">
       <div className="h-screen overflow-hidden flex flex-row  ">
         <div className="flex-1 h-screen overflow-hidden flex flex-row bg-white border-t border-r border-gray-200 rounded-tr-xl mr-2">
@@ -15,5 +17,6 @@ export default function App() {
         </div>
       </div>
     </div>
+    </ScratchProvider>
   );
 }
