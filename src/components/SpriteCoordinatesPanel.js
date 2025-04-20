@@ -1,8 +1,16 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { ScratchContext } from "../context/ScratchContext";
+import Icon from "./Icon";
 
 export default function SpriteCoordinatesPanel() {
-  const { sprites, updateSpritePosition, selectedSpriteId } = useContext(ScratchContext);
+  const { 
+    sprites, 
+    updateSpritePosition, 
+    selectedSpriteId,
+    openSpriteSelector,
+    deleteSprite  // We'll need to get this from context
+  } = useContext(ScratchContext);
+  
   const [tempCoords, setTempCoords] = useState({});
   const [isEditing, setIsEditing] = useState({});
   const initializedRef = useRef(false);
@@ -118,21 +126,46 @@ export default function SpriteCoordinatesPanel() {
     }
   };
 
+  // Handle sprite deletion with confirmation
+  const handleDeleteSprite = (spriteId, spriteName) => {
+    if (window.confirm(`Are you sure you want to delete the sprite "${spriteName}"?`)) {
+      deleteSprite(spriteId);
+    }
+  };
+
   return (
     <div className="bg-white border-t border-gray-200 p-3 h-full overflow-y-auto">
-      <div className="text-sm font-semibold mb-3">Sprite Position</div>
+      <div className="flex justify-between items-center mb-3">
+        <div className="text-sm font-semibold">Sprite Position</div>
+        <button 
+          className="flex items-center justify-center text-blue-500 hover:text-blue-700"
+          onClick={openSpriteSelector}
+          title="Add a new sprite"
+        >
+          <Icon name="plus-circle" size={30} />
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {sprites.map((sprite) => (
           <div
             key={sprite.id}
-            className={`border rounded-md p-3 ${
+            className={`border rounded-lg p-3 relative ${
               sprite.id === selectedSpriteId
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-200"
             }`}
           >
-            <div className="text-sm font-medium mb-2">{sprite.name}</div>
+            {/* Delete Button - Top right corner */}
+            <button
+              className="absolute top-1 right-1  hover:bg-red-200 text-red-500 hover:text-red-700 p-1 rounded-full"
+              onClick={() => handleDeleteSprite(sprite.id, sprite.name)}
+              title="Delete sprite"
+            >
+              <Icon name="trash" size={15} />
+            </button>
+
+            <div className="text-sm font-medium mb-2 pr-6">{sprite.name}</div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 break-words">
               <div className="flex items-center gap-1 min-w-0">

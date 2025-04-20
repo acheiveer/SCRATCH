@@ -81,18 +81,13 @@ const handleDragStart = (e, blockType, blockSubtype, blockData) => {
   return (
     <div className="w-50 flex-none h-full overflow-y-auto flex flex-col items-start p-2 border-r border-gray-200">
       <div className="font-bold"> {"Events"} </div>
-      <button 
-          className="w-full min-w-[150px] bg-green-500 hover:bg-green-600 text-white px-2 py-1 my-2 rounded-md font-bold"
-          onClick={togglePlay}
+      <button
+        className={`w-full min-w-[150px] flex justify-center items-center gap-2 px-4 py-2 my-2 rounded-md font-bold text-base text-white 
+    ${isPlaying ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+        onClick={togglePlay}
       >
-          {isPlaying ? "Stop" : "Play"}
-      </button>
-      <button 
-          className="w-full min-w-[150px] bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 my-2 rounded-md font-bold"
-          // onClick={addSprite}
-          onClick={openSpriteSelector}
-      >
-          Add Sprite
+        <Icon name="play" size={15} className="text-white mx-2" />
+        {isPlaying ? "Stop" : "Play"}
       </button>
       
       <div className="font-bold mt-4"> {"Motion"} </div>
