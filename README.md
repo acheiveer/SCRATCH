@@ -33,7 +33,7 @@ A web-based **drag-and-drop visual programming app** inspired by Scratch. Build 
 
 ## 📁 Project Structure
 
-
+![](public/projectStructure.png)
 
 ---
 
@@ -68,7 +68,6 @@ A web-based **drag-and-drop visual programming app** inspired by Scratch. Build 
 
 ## 📸 Screenshots
 
-> _Add screenshots or GIFs here showcasing the UI and features._
 
 ---
 
