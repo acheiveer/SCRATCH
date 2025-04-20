@@ -8,7 +8,7 @@ export default function SpriteCoordinatesPanel() {
     updateSpritePosition, 
     selectedSpriteId,
     openSpriteSelector,
-    deleteSprite  // We'll need to get this from context
+    deleteSprite
   } = useContext(ScratchContext);
   
   const [tempCoords, setTempCoords] = useState({});
@@ -128,13 +128,11 @@ export default function SpriteCoordinatesPanel() {
 
   // Handle sprite deletion with confirmation
   const handleDeleteSprite = (spriteId, spriteName) => {
-    if (window.confirm(`Are you sure you want to delete the sprite "${spriteName}"?`)) {
-      deleteSprite(spriteId);
-    }
+    deleteSprite(spriteId);
   };
 
   return (
-    <div className="bg-white border-t border-gray-200 p-3 h-full overflow-y-auto">
+    <div className="bg-white border-t border-gray-200 p-3 h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
         <div className="text-sm font-semibold">Sprite Position</div>
         <button 
@@ -146,56 +144,59 @@ export default function SpriteCoordinatesPanel() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {sprites.map((sprite) => (
-          <div
-            key={sprite.id}
-            className={`border rounded-lg p-3 relative ${
-              sprite.id === selectedSpriteId
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200"
-            }`}
-          >
-            {/* Delete Button - Top right corner */}
-            <button
-              className="absolute top-1 right-1  hover:bg-red-200 text-red-500 hover:text-red-700 p-1 rounded-full"
-              onClick={() => handleDeleteSprite(sprite.id, sprite.name)}
-              title="Delete sprite"
+      {/* This div will contain the horizontally scrollable sprites */}
+      <div className="overflow-x-auto pb-2 flex-grow">
+        <div className="flex flex-nowrap space-x-3 min-w-min">
+          {sprites.map((sprite) => (
+            <div
+              key={sprite.id}
+              className={`border rounded-lg p-3 relative flex-shrink-0 ${
+                sprite.id === selectedSpriteId
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200"
+              }`}
             >
-              <Icon name="trash" size={15} />
-            </button>
+              {/* Delete Button - Top right corner */}
+              <button
+                className="absolute top-1 right-1 hover:bg-red-200 text-red-500 hover:text-red-700 p-1 rounded-full"
+                onClick={() => handleDeleteSprite(sprite.id, sprite.name)}
+                title="Delete sprite"
+              >
+                <Icon name="trash" size={15} />
+              </button>
 
-            <div className="text-sm font-medium mb-2 pr-6">{sprite.name}</div>
+              <div className="text-sm font-medium mb-2 pr-6">{sprite.name}</div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 break-words">
-              <div className="flex items-center gap-1 min-w-0">
-                <label className="text-xs font-medium text-gray-600">X:</label>
-                <input
-                  type="number"
-                  className="border rounded px-2 py-1 w-20 text-sm min-w-0"
-                  value={tempCoords[sprite.id]?.x !== undefined ? tempCoords[sprite.id].x : sprite.x}
-                  onChange={(e) => handleCoordChange(sprite.id, "x", e.target.value)}
-                  onFocus={() => handleFocus(sprite.id, "x")}
-                  onBlur={() => handleBlur(sprite.id, "x")}
-                  onKeyPress={(e) => handleKeyPress(e, sprite.id, "x")}
-                />
-              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 break-words">
+                <div className="flex items-center gap-1 min-w-0">
+                  <label className="text-xs font-medium text-gray-600">X:</label>
+                  <input
+                    type="number"
+                    className="border rounded px-2 py-1 w-20 text-sm min-w-0"
+                    value={tempCoords[sprite.id]?.x !== undefined ? tempCoords[sprite.id].x : sprite.x}
+                    onChange={(e) => handleCoordChange(sprite.id, "x", e.target.value)}
+                    onFocus={() => handleFocus(sprite.id, "x")}
+                    onBlur={() => handleBlur(sprite.id, "x")}
+                    onKeyPress={(e) => handleKeyPress(e, sprite.id, "x")}
+                  />
+                </div>
 
-              <div className="flex items-center gap-1 min-w-0">
-                <label className="text-xs font-medium text-gray-600">Y:</label>
-                <input
-                  type="number"
-                  className="border rounded px-2 py-1 w-20 text-sm min-w-0"
-                  value={tempCoords[sprite.id]?.y !== undefined ? tempCoords[sprite.id].y : sprite.y}
-                  onChange={(e) => handleCoordChange(sprite.id, "y", e.target.value)}
-                  onFocus={() => handleFocus(sprite.id, "y")}
-                  onBlur={() => handleBlur(sprite.id, "y")}
-                  onKeyPress={(e) => handleKeyPress(e, sprite.id, "y")}
-                />
+                <div className="flex items-center gap-1 min-w-0">
+                  <label className="text-xs font-medium text-gray-600">Y:</label>
+                  <input
+                    type="number"
+                    className="border rounded px-2 py-1 w-20 text-sm min-w-0"
+                    value={tempCoords[sprite.id]?.y !== undefined ? tempCoords[sprite.id].y : sprite.y}
+                    onChange={(e) => handleCoordChange(sprite.id, "y", e.target.value)}
+                    onFocus={() => handleFocus(sprite.id, "y")}
+                    onBlur={() => handleBlur(sprite.id, "y")}
+                    onKeyPress={(e) => handleKeyPress(e, sprite.id, "y")}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
