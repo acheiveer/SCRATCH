@@ -79,25 +79,65 @@ export default function PreviewArea() {
   
     if (type === "motion") {
       switch (subtype) {
+        // case "move_steps":
+        //   {
+        //     // For movement, use smaller incremental steps to detect collisions better
+        //     const angle = sprite.rotation * (Math.PI / 180);
+        //     const totalSteps = script.steps;
+        //     const stepSize = 5; // Move in smaller increments
+        //     const stepCount = Math.abs(Math.ceil(totalSteps / stepSize));
+        //     const actualStepSize = totalSteps / stepCount;
+            
+        //     // Move in small steps to allow for collision detection
+        //     for (let i = 0; i < stepCount; i++) {
+        //       const stepX = sprite.x + actualStepSize * Math.cos(angle);
+        //       const stepY = sprite.y + actualStepSize * Math.sin(angle);
+        //       updateSpritePosition(sprite.id, stepX, stepY);
+        //       await delay(50); // Small delay between incremental moves
+        //     }
+        //   }
+        //   break;
+
         case "move_steps":
           {
-            // For movement, use smaller incremental steps to detect collisions better
-            const angle = sprite.rotation * (Math.PI / 180);
-            const totalSteps = script.steps;
-            const stepSize = 5; // Move in smaller increments
-            const stepCount = Math.abs(Math.ceil(totalSteps / stepSize));
-            const actualStepSize = totalSteps / stepCount;
-            
-            // Move in small steps to allow for collision detection
-            for (let i = 0; i < stepCount; i++) {
-              const stepX = sprite.x + actualStepSize * Math.cos(angle);
-              const stepY = sprite.y + actualStepSize * Math.sin(angle);
-              updateSpritePosition(sprite.id, stepX, stepY);
-              await delay(50); // Small delay between incremental moves
+            // Get the exact number of steps to move
+            const stepsToMove = script.steps;
+
+            // Convert the sprite's rotation to radians (Scratch uses degrees)
+            const directionInRadians = sprite.rotation * (Math.PI / 180);
+
+            // Calculate the change in x and y exactly as Scratch does
+            // In Scratch, positive rotation means clockwise from right-facing (0°)
+            const dx = stepsToMove * Math.cos(directionInRadians);
+            const dy = stepsToMove * Math.sin(directionInRadians);
+
+            // Calculate the new position
+            const newX = sprite.x + dx;
+            const newY = sprite.y + dy;
+
+            // For animation and collision detection purposes, we'll move in small steps
+            // but ensure we cover the exact distance
+            const animationSteps = 10;
+            const stepX = dx / animationSteps;
+            const stepY = dy / animationSteps;
+
+            // Start from current position
+            let currentX = sprite.x;
+            let currentY = sprite.y;
+
+            // Animate the movement
+            for (let i = 0; i < animationSteps; i++) {
+              currentX += stepX;
+              currentY += stepY;
+              updateSpritePosition(sprite.id, currentX, currentY);
+              await delay(20);
             }
+
+            // Ensure we end at the exact calculated position
+            updateSpritePosition(sprite.id, newX, newY);
           }
           break;
-  
+
         case "turn_degrees":
           {
             const delta = script.direction === "left" ? -script.degrees : script.degrees;
